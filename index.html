@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TMB - Online Pre-Approval Form</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- ============================================================
+     WELCOME SCREEN
+     ============================================================ -->
+<div id="welcome" class="screen active">
+  <div class="welcome-card">
+    <div class="brand-name">
+      <h1>Toyota Manila Bay</h1>
+    </div>
+    <p class="welcome-title">Welcome! Your Personal Information is safe with us.</p>
+    <p class="welcome-sub">We respect your privacy and handle all data with strict confidentiality.</p>
+    <a class="privacy-link" href="https://toyota.com.ph/privacy-policy" target="_blank">View our Privacy Policy</a>
+    <button class="btn-primary" onclick="startClientForm()">Click here if Client</button>
+    <hr class="divider">
+    <p class="login-label">Login for Marketing Professional / Sales Agent</p>
+    <div class="login-inputs">
+      <input type="email" id="admin-email" placeholder="Email address" />
+      <input type="password" id="admin-pass" placeholder="Password" />
+    </div>
+    <button class="btn-secondary" onclick="adminLogin()">Agent Login</button>
+  </div>
+</div>
+
+<!-- ============================================================
+     MULTI-STEP FORM SCREEN
+     ============================================================ -->
+<div id="form-screen" class="screen">
+  <div class="form-header no-print">
+    <div>
+      <h2>TMB Online Pre-Approval</h2>
+      <span id="step-label">Step 1 of 5 — Unit Information</span>
+    </div>
+  </div>
+
+  <div class="form-body">
+    <div class="steps-bar" id="steps-bar">
+      <div class="step-dot active" id="dot-1"></div>
+      <div class="step-dot" id="dot-2"></div>
+      <div class="step-dot" id="dot-3"></div>
+      <div class="step-dot" id="dot-4"></div>
+      <div class="step-dot" id="dot-5"></div>
+    </div>
+
+    <!-- PAGE 1: Unit Information -->
+    <div id="page-1">
+      <p class="step-title">Unit Information</p>
+      <p class="step-sub">Tell us about the vehicle you are interested in.</p>
+      <div class="form-card">
+        <h3>Vehicle Details</h3>
+        <div class="form-grid">
+          <div class="full">
+            <label>Unit / Model</label>
+            <input type="text" id="f_unit" placeholder="e.g. Vios 1.3 XLE CVT" />
+          </div>
+          <div>
+            <label>Color</label>
+            <input type="text" id="f_color" placeholder="e.g. Silver Metallic" />
+          </div>
+          <div>
+            <label>Year Model</label>
+            <input type="text" id="f_year" placeholder="e.g. 2026" />
+          </div>
+          <div>
+            <label>Downpayment (%)</label>
+            <select id="f_dp">
+              <option value="">Select DP</option>
+              <option>15%</option>
+              <option>20%</option>
+              <option>30%</option>
+              <option>40%</option>
+              <option>50%</option>
+            </select>
+          </div>
+          <div>
+            <label>Preferred Term</label>
+            <select id="f_term">
+              <option value="">Select</option>
+              <option>2 Years</option>
+              <option>3 Years</option>
+              <option>4 Years</option>
+              <option>5 Years</option>
+            </select>
+          </div>
+        </div>
+      </div>
+      <div class="nav-row">
+        <button class="btn-next" style="border:none" onclick="goNext(1)">Next →</button>
+      </div>
+    </div>
+
+    <!-- PAGE 2: Borrower Personal Information -->
+    <div id="page-2" style="display:none">
+      <p class="step-title">Borrower Personal Information</p>
+      <p class="step-sub">Enter the primary borrower's personal details.</p>
+      <div class="form-card">
+        <h3>Personal Details</h3>
+        <div class="form-grid">
+          <div><label>Last Name</label><input type="text" id="b_last" /></div>
+          <div><label>First Name</label><input type="text" id="b_first" /></div>
+          <div><label>Middle Name</label><input type="text" id="b_mid" /></div>
+          <div><label>Age</label><input type="number" id="b_age" /></div>
+          <div><label>Birthdate</label><input type="date" id="b_bday" /></div>
+          <div>
+            <label>Civil Status</label>
+            <select id="b_status">
+              <option value="">Select</option>
+              <option>Single</option>
+              <option>Married</option>
+              <option>Widowed</option>
+              <option>Separated</option>
+            </select>
+          </div>
+          <div class="full"><label>Address</label><input type="text" id="b_address" /></div>
+          <div><label>Length of Stay</label><input type="text" id="b_los" placeholder="e.g. 5 years" /></div>
+          <div>
+            <label>Ownership</label>
+            <select id="b_own">
+              <option value="">Select</option>
+              <option>Owned</option>
+              <option>Mortgage</option>
+              <option>Rented</option>
+              <option>Used Free</option>
+            </select>
+          </div>
+          <div><label>Landline</label><input type="tel" id="b_land" /></div>
+          <div><label>Mobile No.</label><input type="tel" id="b_mobile" /></div>
+          <div><label>Citizenship</label><input type="text" id="b_citizen" value="Filipino" /></div>
+          <div><label>No. of Dependents</label><input type="number" id="b_dep" /></div>
+          <div><label>Place of Birth</label><input type="text" id="b_pob" /></div>
+          <div class="full"><label>Mother's Full Maiden Name</label><input type="text" id="b_mom" /></div>
+          <div><label>TIN</label><input type="text" id="b_tin" /></div>
+          <div><label>SSS / GSIS No.</label><input type="text" id="b_sss" /></div>
+          <div class="full"><label>Email Address</label><input type="email" id="b_email" /></div>
+        </div>
+      </div>
+      <div class="nav-row">
+        <button class="btn-back" onclick="goPage(1)">← Back</button>
+        <button class="btn-next" style="background:var(--red);color:#fff;border:none" onclick="goNext(2)">Next →</button>
+      </div>
+    </div>
+
+    <!-- PAGE 3: Borrower Employment & Financial -->
+    <div id="page-3" style="display:none">
+      <p class="step-title">Borrower Employment & Financial</p>
+      <p class="step-sub">Enter employment and financial details of the borrower.</p>
+      <div class="form-card">
+        <h3>Employment Info</h3>
+        <div class="form-grid">
+          <div class="full"><label>Name of Company</label><input type="text" id="be_company" /></div>
+          <div class="full"><label>Office Address</label><input type="text" id="be_offaddr" /></div>
+          <div><label>Position / Title</label><input type="text" id="be_pos" /></div>
+          <div><label>Office Number</label><input type="tel" id="be_offnum" /></div>
+          <div><label>Length of Service</label><input type="text" id="be_los" placeholder="e.g. 3 years" /></div>
+          <div><label>Nature of Industry</label><input type="text" id="be_industry" /></div>
+          <div class="full"><label>Previous Employer</label><input type="text" id="be_prev" /></div>
+        </div>
+      </div>
+      <div class="form-card">
+        <h3>Financial Info</h3>
+        <div class="form-grid">
+          <div><label>Monthly Income (₱)</label><input type="number" id="be_income" /></div>
+          <div><label>Other Sources of Income</label><input type="text" id="be_other" /></div>
+          <div><label>Bank</label><input type="text" id="be_bank" /></div>
+          <div>
+            <label>Account Type</label>
+            <select id="be_accttype">
+              <option value="">Select</option>
+              <option>Savings</option>
+              <option>Checking</option>
+            </select>
+          </div>
+          <div><label>Account Number</label><input type="text" id="be_acctnum" /></div>
+          <div><label>Branch</label><input type="text" id="be_branch" /></div>
+          <div>
+            <label>Best Time to Call</label>
+            <select id="be_call">
+              <option value="">Select</option>
+              <option>Morning (8AM–12PM)</option>
+              <option>Afternoon (12PM–5PM)</option>
+              <option>Evening (5PM–8PM)</option>
+            </select>
+          </div>
+        </div>
+      </div>
+      <div class="nav-row">
+        <button class="btn-back" onclick="goPage(2)">← Back</button>
+        <button class="btn-next" style="background:var(--red);color:#fff;border:none" onclick="goNext(3)">Next →</button>
+      </div>
+    </div>
+
+    <!-- PAGE 4: Co-Borrower Personal Information -->
+    <div id="page-4" style="display:none">
+      <p class="step-title">Co-Borrower Personal Information</p>
+      <p class="step-sub">Enter the co-borrower's personal details (if applicable).</p>
+      <div class="form-card">
+        <h3>Personal Details</h3>
+        <div class="form-grid">
+          <div><label>Last Name</label><input type="text" id="c_last" /></div>
+          <div><label>First Name</label><input type="text" id="c_first" /></div>
+          <div><label>Middle Name</label><input type="text" id="c_mid" /></div>
+          <div><label>Age</label><input type="number" id="c_age" /></div>
+          <div><label>Birthdate</label><input type="date" id="c_bday" /></div>
+          <div>
+            <label>Civil Status</label>
+            <select id="c_status">
+              <option value="">Select</option>
+              <option>Single</option>
+              <option>Married</option>
+              <option>Widowed</option>
+              <option>Separated</option>
+            </select>
+          </div>
+          <div class="full"><label>Address</label><input type="text" id="c_address" /></div>
+          <div><label>Length of Stay</label><input type="text" id="c_los" /></div>
+          <div>
+            <label>Ownership</label>
+            <select id="c_own">
+              <option value="">Select</option>
+              <option>Owned</option>
+              <option>Mortgage</option>
+              <option>Rented</option>
+              <option>Used Free</option>
+            </select>
+          </div>
+          <div><label>Landline</label><input type="tel" id="c_land" /></div>
+          <div><label>Mobile No.</label><input type="tel" id="c_mobile" /></div>
+          <div><label>Citizenship</label><input type="text" id="c_citizen" value="Filipino" /></div>
+          <div><label>No. of Dependents</label><input type="number" id="c_dep" /></div>
+          <div><label>Place of Birth</label><input type="text" id="c_pob" /></div>
+          <div class="full"><label>Mother's Full Maiden Name</label><input type="text" id="c_mom" /></div>
+          <div><label>TIN</label><input type="text" id="c_tin" /></div>
+          <div><label>SSS / GSIS No.</label><input type="text" id="c_sss" /></div>
+          <div class="full"><label>Email Address</label><input type="email" id="c_email" /></div>
+        </div>
+      </div>
+      <div class="nav-row">
+        <button class="btn-back" onclick="goPage(3)">← Back</button>
+        <button class="btn-next" style="background:var(--red);color:#fff;border:none" onclick="goNext(4)">Next →</button>
+      </div>
+    </div>
+
+    <!-- PAGE 5: Co-Borrower Employment & Financial -->
+    <div id="page-5" style="display:none">
+      <p class="step-title">Co-Borrower Employment & Financial</p>
+      <p class="step-sub">Enter employment and financial details of the co-borrower.</p>
+      <div class="form-card">
+        <h3>Employment Info</h3>
+        <div class="form-grid">
+          <div class="full"><label>Name of Company</label><input type="text" id="ce_company" /></div>
+          <div class="full"><label>Office Address</label><input type="text" id="ce_offaddr" /></div>
+          <div><label>Position / Title</label><input type="text" id="ce_pos" /></div>
+          <div><label>Office Number</label><input type="tel" id="ce_offnum" /></div>
+          <div><label>Length of Service</label><input type="text" id="ce_los" /></div>
+          <div><label>Nature of Industry</label><input type="text" id="ce_industry" /></div>
+          <div class="full"><label>Previous Employer</label><input type="text" id="ce_prev" /></div>
+        </div>
+      </div>
+      <div class="form-card">
+        <h3>Financial Info</h3>
+        <div class="form-grid">
+          <div><label>Monthly Income (₱)</label><input type="number" id="ce_income" /></div>
+          <div><label>Other Sources of Income</label><input type="text" id="ce_other" /></div>
+          <div><label>Bank</label><input type="text" id="ce_bank" /></div>
+          <div>
+            <label>Account Type</label>
+            <select id="ce_accttype">
+              <option value="">Select</option>
+              <option>Savings</option>
+              <option>Checking</option>
+            </select>
+          </div>
+          <div><label>Account Number</label><input type="text" id="ce_acctnum" /></div>
+          <div><label>Branch</label><input type="text" id="ce_branch" /></div>
+        </div>
+      </div>
+      <div class="nav-row">
+        <button class="btn-back" onclick="goPage(4)">← Back</button>
+        <button class="btn-next" style="background:var(--red);color:#fff;border:none" onclick="submitForm()">Submit Application →</button>
+      </div>
+    </div>
+
+  </div><!-- end .form-body -->
+</div><!-- end #form-screen -->
+
+<!-- ============================================================
+     OUTPUT / SUMMARY SCREEN
+     ============================================================ -->
+<div id="output-screen" class="screen">
+  <div class="output-header no-print">
+    <h2>Application Summary</h2>
+    <div class="output-actions">
+      <button onclick="printDoc()">🖨 Print</button>
+      <button onclick="savePDF()">⬇ Save PDF</button>
+      <button onclick="goScreen('welcome')">✕ Close</button>
+    </div>
+  </div>
+  <div class="output-body">
+    <div class="printable" id="printable-doc">
+      <!-- Dynamically filled by script.js -->
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     ADMIN DASHBOARD SCREEN
+     ============================================================ -->
+<div id="admin-screen" class="screen">
+  <div class="admin-header no-print">
+    <h2>Agent Dashboard — Submissions</h2>
+    <button class="btn-logout" onclick="goScreen('welcome')">Logout</button>
+  </div>
+  <div class="admin-body" id="admin-body">
+    <div class="empty-state">No submissions yet.</div>
+  </div>
+</div>
+
+<!-- Toast Notification -->
+<div class="toast" id="toast"></div>
+
+<!-- Scripts -->
+<script src="script.js"></script>
+
+</body>
+</html>
