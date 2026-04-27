@@ -1,0 +1,593 @@
+/* ============================================================
+   TMBCorp Pre-Approval System — Stylesheet
+   ============================================================ */
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  --red: #CC0000;
+  --red-dark: #990000;
+  --black: #111111;
+  --gray: #555;
+  --light-gray: #f5f5f5;
+  --border: #ddd;
+  --white: #fff;
+}
+
+body {
+  font-family: 'Segoe UI', Arial, sans-serif;
+  background: #f0f0f0;
+  color: var(--black);
+  min-height: 100vh;
+}
+
+/* ============================================================
+   SCREENS
+   ============================================================ */
+.screen {
+  display: none;
+  min-height: 100vh;
+}
+.screen.active {
+  display: flex;
+  flex-direction: column;
+}
+
+/* ============================================================
+   WELCOME PAGE
+   ============================================================ */
+#welcome {
+  background: var(--white);
+  align-items: center;
+  justify-content: center;
+  padding: 2rem 1rem;
+}
+
+.welcome-card {
+  background: var(--white);
+  border: 1.5px solid var(--border);
+  border-radius: 12px;
+  max-width: 480px;
+  width: 100%;
+  padding: 2.5rem 2rem;
+  text-align: center;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+}
+
+.brand-name {
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+.brand-name h1 {
+  font-size: 1.6rem;
+  font-weight: 900;
+  color: var(--black);
+  line-height: 1.1;
+  letter-spacing: -0.01em;
+}
+
+.welcome-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--black);
+  margin-bottom: 0.5rem;
+}
+.welcome-sub {
+  font-size: 0.85rem;
+  color: var(--gray);
+  margin-bottom: 0.4rem;
+}
+.privacy-link {
+  font-size: 0.8rem;
+  color: var(--red);
+  text-decoration: underline;
+  margin-bottom: 2rem;
+  display: block;
+}
+
+.btn-primary {
+  display: block;
+  width: 100%;
+  background: var(--red);
+  color: var(--white);
+  border: none;
+  border-radius: 8px;
+  padding: 1rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  margin-bottom: 1.5rem;
+  transition: background 0.2s;
+  letter-spacing: 0.02em;
+}
+.btn-primary:hover {
+  background: var(--red-dark);
+}
+
+.divider {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin: 1rem 0;
+}
+
+.login-label {
+  font-size: 0.78rem;
+  color: var(--gray);
+  margin-bottom: 0.75rem;
+}
+.login-inputs {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+.login-inputs input {
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 0.6rem 0.8rem;
+  font-size: 0.85rem;
+  width: 100%;
+}
+
+.btn-secondary {
+  background: var(--white);
+  color: var(--red);
+  border: 1.5px solid var(--red);
+  border-radius: 6px;
+  padding: 0.6rem 1.2rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  width: 100%;
+  transition: all 0.2s;
+}
+.btn-secondary:hover {
+  background: var(--red);
+  color: var(--white);
+}
+
+/* ============================================================
+   FORM SCREEN
+   ============================================================ */
+#form-screen {
+  background: #f0f0f0;
+}
+
+.form-header {
+  background: var(--red);
+  color: var(--white);
+  padding: 1rem 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+.form-header h2 {
+  font-size: 1rem;
+  font-weight: 700;
+}
+.form-header span {
+  font-size: 0.8rem;
+  opacity: 0.85;
+}
+
+.form-body {
+  flex: 1;
+  padding: 1.5rem 1rem;
+  max-width: 720px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+/* Step Progress Bar */
+.steps-bar {
+  display: flex;
+  gap: 0.4rem;
+  margin-bottom: 1.5rem;
+}
+.step-dot {
+  flex: 1;
+  height: 5px;
+  border-radius: 3px;
+  background: #ccc;
+  transition: background 0.3s;
+}
+.step-dot.done  { background: var(--red); }
+.step-dot.active { background: var(--black); }
+
+/* Form Cards */
+.form-card {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 1.5rem;
+  margin-bottom: 1rem;
+}
+.form-card h3 {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--red);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: 1.2rem;
+  padding-bottom: 0.6rem;
+  border-bottom: 1.5px solid var(--red);
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.9rem;
+}
+.form-grid .full {
+  grid-column: 1 / -1;
+}
+
+label {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--gray);
+  margin-bottom: 0.3rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+input,
+select,
+textarea {
+  width: 100%;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 0.6rem 0.8rem;
+  font-size: 0.9rem;
+  color: var(--black);
+  background: var(--white);
+  transition: border-color 0.2s;
+}
+input:focus,
+select:focus,
+textarea:focus {
+  outline: none;
+  border-color: var(--red);
+}
+
+/* Nav Buttons */
+.nav-row {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+.nav-row button {
+  flex: 1;
+  padding: 0.9rem;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+  border: none;
+}
+.btn-back {
+  background: var(--white);
+  color: var(--black);
+  border: 1.5px solid var(--border) !important;
+}
+.btn-back:hover { background: var(--light-gray); }
+.btn-next { background: var(--red); color: var(--white); }
+.btn-next:hover { background: var(--red-dark); }
+
+.step-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin-bottom: 0.3rem;
+}
+.step-sub {
+  font-size: 0.82rem;
+  color: var(--gray);
+  margin-bottom: 1.2rem;
+}
+
+/* ============================================================
+   OUTPUT / SUMMARY SCREEN
+   ============================================================ */
+#output-screen {
+  background: #f0f0f0;
+}
+
+.output-header {
+  background: var(--red);
+  color: var(--white);
+  padding: 1rem 1.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.output-header h2 {
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.output-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+.output-actions button {
+  background: var(--white);
+  color: var(--red);
+  border: none;
+  border-radius: 6px;
+  padding: 0.5rem 1rem;
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.output-body {
+  padding: 1.5rem 1rem;
+  max-width: 760px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+/* ============================================================
+   PRINTABLE DOCUMENT
+   ============================================================ */
+.printable {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 2rem;
+}
+
+.print-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  border-bottom: 3px solid var(--red);
+  padding-bottom: 1rem;
+  margin-bottom: 1.5rem;
+}
+.print-logo-area {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+.print-brand h1 {
+  font-size: 1.3rem;
+  font-weight: 900;
+  color: var(--black);
+}
+.print-brand p {
+  font-size: 0.72rem;
+  color: var(--gray);
+}
+
+.print-title {
+  text-align: right;
+}
+.print-title h2 {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--red);
+}
+.print-title p {
+  font-size: 0.78rem;
+  color: var(--gray);
+}
+
+.print-meta {
+  display: flex;
+  gap: 1.5rem;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+}
+.print-meta-item {
+  font-size: 0.82rem;
+}
+.print-meta-item strong {
+  color: var(--red);
+}
+
+.section-title {
+  background: var(--red);
+  color: var(--white);
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  padding: 0.4rem 0.75rem;
+  border-radius: 4px;
+  margin-bottom: 0.8rem;
+}
+
+.info-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.5rem 1.5rem;
+  margin-bottom: 1.2rem;
+}
+.info-row {
+  border-bottom: 1px solid #eee;
+  padding: 0.35rem 0;
+}
+.info-label {
+  font-size: 0.7rem;
+  color: var(--gray);
+  text-transform: uppercase;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+}
+.info-val {
+  font-size: 0.88rem;
+  color: var(--black);
+  font-weight: 500;
+}
+
+.sig-row {
+  display: flex;
+  gap: 2rem;
+  margin-top: 2rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border);
+}
+.sig-box {
+  flex: 1;
+  text-align: center;
+}
+.sig-line {
+  border-top: 1.5px solid var(--black);
+  margin: 2rem 0 0.3rem;
+}
+.sig-label {
+  font-size: 0.72rem;
+  color: var(--gray);
+}
+
+.print-footer {
+  text-align: center;
+  margin-top: 1.5rem;
+  font-size: 0.72rem;
+  color: var(--gray);
+  border-top: 1px solid var(--border);
+  padding-top: 0.75rem;
+}
+.timestamp-area {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 0.5rem;
+  font-size: 0.72rem;
+  color: var(--gray);
+}
+
+/* ============================================================
+   ADMIN DASHBOARD
+   ============================================================ */
+#admin-screen {
+  background: #f0f0f0;
+}
+
+.admin-header {
+  background: var(--black);
+  color: var(--white);
+  padding: 1rem 1.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.admin-header h2 {
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.admin-body {
+  padding: 1.5rem 1rem;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.admin-card {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 1.25rem;
+  margin-bottom: 0.75rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+.admin-card-info h4 {
+  font-size: 0.95rem;
+  font-weight: 700;
+}
+.admin-card-info p {
+  font-size: 0.8rem;
+  color: var(--gray);
+}
+
+.admin-card-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+.btn-view {
+  background: var(--red);
+  color: var(--white);
+  border: none;
+  border-radius: 6px;
+  padding: 0.5rem 1rem;
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+.btn-logout {
+  background: var(--white);
+  color: var(--black);
+  border: 1.5px solid var(--border);
+  border-radius: 6px;
+  padding: 0.5rem 1rem;
+  font-size: 0.82rem;
+  cursor: pointer;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 3rem;
+  color: var(--gray);
+  font-size: 0.9rem;
+}
+
+.badge {
+  display: inline-block;
+  background: #e8f5e9;
+  color: #2e7d32;
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+  margin-left: 0.5rem;
+}
+
+/* ============================================================
+   TOAST NOTIFICATION
+   ============================================================ */
+.toast {
+  position: fixed;
+  bottom: 1.5rem;
+  right: 1.5rem;
+  background: var(--black);
+  color: var(--white);
+  padding: 0.75rem 1.25rem;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s;
+  z-index: 9999;
+}
+.toast.show {
+  opacity: 1;
+}
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+@media (max-width: 520px) {
+  .form-grid       { grid-template-columns: 1fr; }
+  .info-grid       { grid-template-columns: 1fr; }
+  .sig-row         { flex-direction: column; }
+  .print-header    { flex-direction: column; gap: 0.75rem; }
+  .print-title     { text-align: left; }
+}
+
+/* ============================================================
+   PRINT STYLES
+   ============================================================ */
+@media print {
+  body        { background: white; }
+  .no-print   { display: none !important; }
+  .printable  { border: none; box-shadow: none; }
+}
