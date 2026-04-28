@@ -1,11 +1,56 @@
 // ============================================================
-//  TMBCorp Pre-Approval System — JavaScript
+//  Toyota Manila Bay — Pre-Approval System
+//  Database: Firebase Firestore (cross-device, real-time)
 // ============================================================
 
+// ------------------------------------------------------------
+// FIREBASE CONFIGURATION
+// ⚠️  SETUP INSTRUCTIONS:
+//   1. Go to https://console.firebase.google.com
+//   2. Create a new project (e.g. "tmb-preapproval")
+//   3. Click "Firestore Database" → Create database → Start in test mode
+//   4. Click the gear icon → Project Settings → Your apps → Add web app
+//   5. Copy the firebaseConfig values below and replace them
+// ------------------------------------------------------------
+const firebaseConfig = {
+  apiKey:            "PASTE_YOUR_API_KEY_HERE",
+  authDomain:        "PASTE_YOUR_AUTH_DOMAIN_HERE",
+  projectId:         "PASTE_YOUR_PROJECT_ID_HERE",
+  storageBucket:     "PASTE_YOUR_STORAGE_BUCKET_HERE",
+  messagingSenderId: "PASTE_YOUR_MESSAGING_SENDER_ID_HERE",
+  appId:             "PASTE_YOUR_APP_ID_HERE"
+};
+
+// Initialize Firebase
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+const COLLECTION = 'tmb_submissions'; // Firestore collection name
+
+// ------------------------------------------------------------
+// CREDENTIALS
+// ------------------------------------------------------------
 const ADMIN_EMAIL = 'jennyrosedoreza1709@gmail.com';
 const ADMIN_PASS  = '110907';
 
-let submissions = JSON.parse(localStorage.getItem('tmb_submissions') || '[]');
+// ------------------------------------------------------------
+// LOADING OVERLAY
+// ------------------------------------------------------------
+function showLoading(msg = 'Please wait...') {
+  let el = document.getElementById('loading-overlay');
+  if (!el) {
+    el = document.createElement('div');
+    el.id = 'loading-overlay';
+    el.className = 'overlay';
+    document.body.appendChild(el);
+  }
+  el.innerHTML = `<div class="spinner"></div><span>${msg}</span>`;
+  el.style.display = 'flex';
+}
+
+function hideLoading() {
+  const el = document.getElementById('loading-overlay');
+  if (el) el.style.display = 'none';
+}
 
 // ------------------------------------------------------------
 // TOAST NOTIFICATION
@@ -14,7 +59,7 @@ function showToast(msg) {
   const t = document.getElementById('toast');
   t.textContent = msg;
   t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 2500);
+  setTimeout(() => t.classList.remove('show'), 3000);
 }
 
 // ------------------------------------------------------------
@@ -24,7 +69,6 @@ function goScreen(id) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   const target = document.getElementById(id + '-screen') || document.getElementById(id);
   if (target) target.classList.add('active');
-  // welcome has no "-screen" suffix
   if (id === 'welcome') document.getElementById('welcome').classList.add('active');
 }
 
@@ -40,11 +84,116 @@ function adminLogin() {
   const email = document.getElementById('admin-email').value.trim();
   const pass  = document.getElementById('admin-pass').value;
   if (email === ADMIN_EMAIL && pass === ADMIN_PASS) {
-    renderAdmin();
     goScreen('admin');
+    loadSubmissions();
   } else {
     showToast('Invalid credentials. Please try again.');
   }
+}
+
+// ------------------------------------------------------------
+// VALIDATION — required fields per page
+// ------------------------------------------------------------
+const PAGE_FIELDS = {
+  1: [
+    { id: 'f_unit',  label: 'Unit / Model' },
+    { id: 'f_color', label: 'Color' },
+    { id: 'f_year',  label: 'Year Model' },
+    { id: 'f_dp',    label: 'Downpayment' },
+    { id: 'f_term',  label: 'Preferred Term' }
+  ],
+  2: [
+    { id: 'b_last',    label: 'Last Name' },
+    { id: 'b_first',   label: 'First Name' },
+    { id: 'b_mid',     label: 'Middle Name' },
+    { id: 'b_age',     label: 'Age' },
+    { id: 'b_bday',    label: 'Birthdate' },
+    { id: 'b_status',  label: 'Civil Status' },
+    { id: 'b_address', label: 'Address' },
+    { id: 'b_los',     label: 'Length of Stay' },
+    { id: 'b_own',     label: 'Ownership' },
+    { id: 'b_mobile',  label: 'Mobile No.' },
+    { id: 'b_citizen', label: 'Citizenship' },
+    { id: 'b_dep',     label: 'No. of Dependents' },
+    { id: 'b_pob',     label: 'Place of Birth' },
+    { id: 'b_mom',     label: "Mother's Full Maiden Name" },
+    { id: 'b_tin',     label: 'TIN' },
+    { id: 'b_sss',     label: 'SSS / GSIS No.' },
+    { id: 'b_email',   label: 'Email Address' }
+  ],
+  3: [
+    { id: 'be_company',  label: 'Name of Company' },
+    { id: 'be_offaddr',  label: 'Office Address' },
+    { id: 'be_pos',      label: 'Position' },
+    { id: 'be_offnum',   label: 'Office Number' },
+    { id: 'be_los',      label: 'Length of Service' },
+    { id: 'be_industry', label: 'Nature of Industry' },
+    { id: 'be_income',   label: 'Monthly Income' },
+    { id: 'be_bank',     label: 'Bank' },
+    { id: 'be_accttype', label: 'Account Type' },
+    { id: 'be_acctnum',  label: 'Account Number' },
+    { id: 'be_branch',   label: 'Branch' },
+    { id: 'be_call',     label: 'Best Time to Call' }
+  ],
+  4: [
+    { id: 'c_last',    label: 'Last Name' },
+    { id: 'c_first',   label: 'First Name' },
+    { id: 'c_mid',     label: 'Middle Name' },
+    { id: 'c_age',     label: 'Age' },
+    { id: 'c_bday',    label: 'Birthdate' },
+    { id: 'c_status',  label: 'Civil Status' },
+    { id: 'c_address', label: 'Address' },
+    { id: 'c_los',     label: 'Length of Stay' },
+    { id: 'c_own',     label: 'Ownership' },
+    { id: 'c_mobile',  label: 'Mobile No.' },
+    { id: 'c_citizen', label: 'Citizenship' },
+    { id: 'c_dep',     label: 'No. of Dependents' },
+    { id: 'c_pob',     label: 'Place of Birth' },
+    { id: 'c_mom',     label: "Mother's Full Maiden Name" },
+    { id: 'c_tin',     label: 'TIN' },
+    { id: 'c_sss',     label: 'SSS / GSIS No.' },
+    { id: 'c_email',   label: 'Email Address' }
+  ],
+  5: [
+    { id: 'ce_company',  label: 'Name of Company' },
+    { id: 'ce_offaddr',  label: 'Office Address' },
+    { id: 'ce_pos',      label: 'Position' },
+    { id: 'ce_offnum',   label: 'Office Number' },
+    { id: 'ce_los',      label: 'Length of Service' },
+    { id: 'ce_industry', label: 'Nature of Industry' },
+    { id: 'ce_income',   label: 'Monthly Income' },
+    { id: 'ce_bank',     label: 'Bank' },
+    { id: 'ce_accttype', label: 'Account Type' },
+    { id: 'ce_acctnum',  label: 'Account Number' },
+    { id: 'ce_branch',   label: 'Branch' }
+  ]
+};
+
+function validatePage(n) {
+  const fields = PAGE_FIELDS[n] || [];
+  let firstError = null;
+  fields.forEach(f => {
+    const el = document.getElementById(f.id);
+    if (el) el.style.borderColor = '';
+  });
+  const missing = [];
+  fields.forEach(f => {
+    const el = document.getElementById(f.id);
+    if (!el) return;
+    if (!el.value.trim()) {
+      el.style.borderColor = '#CC0000';
+      missing.push(f.label);
+      if (!firstError) firstError = el;
+    } else {
+      el.style.borderColor = '';
+    }
+  });
+  if (missing.length > 0) {
+    showToast(`Please fill in: ${missing.slice(0, 3).join(', ')}${missing.length > 3 ? '...' : ''}`);
+    if (firstError) firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    return false;
+  }
+  return true;
 }
 
 // ------------------------------------------------------------
@@ -54,10 +203,8 @@ function goPage(n) {
   for (let i = 1; i <= 5; i++) {
     document.getElementById('page-' + i).style.display = (i === n) ? '' : 'none';
     const dot = document.getElementById('dot-' + i);
-    dot.className = 'step-dot' +
-      (i < n ? ' done' : i === n ? ' active' : '');
+    dot.className = 'step-dot' + (i < n ? ' done' : i === n ? ' active' : '');
   }
-
   const labels = [
     'Unit Information',
     'Borrower Personal Info',
@@ -65,13 +212,12 @@ function goPage(n) {
     'Co-Borrower Personal Info',
     'Co-Borrower Employment & Financial'
   ];
-  document.getElementById('step-label').textContent =
-    `Step ${n} of 5 — ${labels[n - 1]}`;
-
+  document.getElementById('step-label').textContent = `Step ${n} of 5 — ${labels[n - 1]}`;
   window.scrollTo(0, 0);
 }
 
 function goNext(n) {
+  if (!validatePage(n)) return;
   goPage(n + 1);
 }
 
@@ -173,7 +319,7 @@ function collectData() {
 function formatDate(iso) {
   if (!iso) return '';
   const d = new Date(iso);
-  return `${String(d.getMonth() + 1).padStart(2, '0')}/${String(d.getDate()).padStart(2, '0')}/${d.getFullYear()}`;
+  return `${String(d.getMonth()+1).padStart(2,'0')}/${String(d.getDate()).padStart(2,'0')}/${d.getFullYear()}`;
 }
 
 function formatTime(iso) {
@@ -182,7 +328,7 @@ function formatTime(iso) {
   let h = d.getHours(), m = d.getMinutes();
   const ampm = h >= 12 ? 'PM' : 'AM';
   h = h % 12 || 12;
-  return `${h}:${String(m).padStart(2, '0')} ${ampm}`;
+  return `${h}:${String(m).padStart(2,'0')} ${ampm}`;
 }
 
 function nowStamp(iso) {
@@ -195,8 +341,8 @@ function nowStamp(iso) {
 function infoRow(label, val) {
   return `
     <div class="info-row">
-      <div class="info-label">${label}</div>
-      <div class="info-val">${val || '—'}</div>
+      <span class="info-label">${label}:</span>
+      <span class="info-val">${val || '—'}</span>
     </div>`;
 }
 
@@ -207,20 +353,20 @@ function buildDoc(data) {
   const c  = data.coborrower;
   const ce = data.coborrowerEmp;
   const u  = data.unit;
-
   const bName = [b.first, b.mid, b.last].filter(Boolean).join(' ') || '—';
+  const refId = data.firestoreId
+    ? 'TMB-' + data.firestoreId.slice(0, 10).toUpperCase()
+    : 'TMB-' + ts.replace(/[^0-9]/g, '').slice(2, 12);
 
   return `
     <div class="print-header">
       <div class="print-logo-area">
-        <div class="print-brand">
-          <h1>Toyota Manila Bay</h1>
-        </div>
+        <div class="print-brand"><h1>Toyota Manila Bay</h1></div>
       </div>
       <div class="print-title">
         <h2>PRE-APPROVAL APPLICATION</h2>
         <p>${nowStamp(ts)}</p>
-        <p>Ref: TMB-${ts.replace(/[^0-9]/g, '').slice(2, 12)}</p>
+        <p>Ref: ${refId}</p>
       </div>
     </div>
 
@@ -234,20 +380,13 @@ function buildDoc(data) {
 
     <div class="section-title">A — Borrower Personal Information</div>
     <div class="info-grid">
-      ${infoRow('Last Name', b.last)}
-      ${infoRow('First Name', b.first)}
-      ${infoRow('Middle Name', b.mid)}
-      ${infoRow('Age', b.age)}
-      ${infoRow('Birthdate', b.bday)}
-      ${infoRow('Civil Status', b.status)}
-      ${infoRow('Citizenship', b.citizen)}
-      ${infoRow('No. of Dependents', b.dep)}
-      ${infoRow('Place of Birth', b.pob)}
-      ${infoRow('TIN', b.tin)}
-      ${infoRow('SSS / GSIS No.', b.sss)}
-      ${infoRow('Mobile No.', b.mobile)}
-      ${infoRow('Landline', b.land)}
-      ${infoRow('Email Address', b.email)}
+      ${infoRow('Last Name', b.last)}       ${infoRow('First Name', b.first)}
+      ${infoRow('Middle Name', b.mid)}      ${infoRow('Age', b.age)}
+      ${infoRow('Birthdate', b.bday)}       ${infoRow('Civil Status', b.status)}
+      ${infoRow('Citizenship', b.citizen)}  ${infoRow('No. of Dependents', b.dep)}
+      ${infoRow('Place of Birth', b.pob)}   ${infoRow('TIN', b.tin)}
+      ${infoRow('SSS / GSIS No.', b.sss)}  ${infoRow('Mobile No.', b.mobile)}
+      ${infoRow('Landline', b.land)}        ${infoRow('Email Address', b.email)}
     </div>
     <div class="info-grid" style="margin-bottom:1.2rem">
       ${infoRow('Home Address', b.address)}
@@ -258,38 +397,24 @@ function buildDoc(data) {
 
     <div class="section-title">B — Borrower Employment & Financial Information</div>
     <div class="info-grid">
-      ${infoRow('Company Name', be.company)}
-      ${infoRow('Office Address', be.offaddr)}
-      ${infoRow('Position', be.pos)}
-      ${infoRow('Office Number', be.offnum)}
-      ${infoRow('Length of Service', be.los)}
-      ${infoRow('Nature of Industry', be.industry)}
-      ${infoRow('Previous Employer', be.prev)}
-      ${infoRow('Monthly Income', be.income ? '₱' + Number(be.income).toLocaleString() : '')}
-      ${infoRow('Other Income Sources', be.other)}
-      ${infoRow('Bank', be.bank)}
-      ${infoRow('Account Type', be.accttype)}
-      ${infoRow('Account Number', be.acctnum)}
-      ${infoRow('Branch', be.branch)}
-      ${infoRow('Best Time to Call', be.call)}
+      ${infoRow('Company Name', be.company)}       ${infoRow('Office Address', be.offaddr)}
+      ${infoRow('Position', be.pos)}               ${infoRow('Office Number', be.offnum)}
+      ${infoRow('Length of Service', be.los)}      ${infoRow('Nature of Industry', be.industry)}
+      ${infoRow('Previous Employer', be.prev)}     ${infoRow('Monthly Income', be.income ? '₱' + Number(be.income).toLocaleString() : '')}
+      ${infoRow('Other Income Sources', be.other)} ${infoRow('Bank', be.bank)}
+      ${infoRow('Account Type', be.accttype)}      ${infoRow('Account Number', be.acctnum)}
+      ${infoRow('Branch', be.branch)}              ${infoRow('Best Time to Call', be.call)}
     </div>
 
     <div class="section-title">C — Co-Borrower Personal Information</div>
     <div class="info-grid">
-      ${infoRow('Last Name', c.last)}
-      ${infoRow('First Name', c.first)}
-      ${infoRow('Middle Name', c.mid)}
-      ${infoRow('Age', c.age)}
-      ${infoRow('Birthdate', c.bday)}
-      ${infoRow('Civil Status', c.status)}
-      ${infoRow('Citizenship', c.citizen)}
-      ${infoRow('No. of Dependents', c.dep)}
-      ${infoRow('Place of Birth', c.pob)}
-      ${infoRow('TIN', c.tin)}
-      ${infoRow('SSS / GSIS No.', c.sss)}
-      ${infoRow('Mobile No.', c.mobile)}
-      ${infoRow('Landline', c.land)}
-      ${infoRow('Email Address', c.email)}
+      ${infoRow('Last Name', c.last)}       ${infoRow('First Name', c.first)}
+      ${infoRow('Middle Name', c.mid)}      ${infoRow('Age', c.age)}
+      ${infoRow('Birthdate', c.bday)}       ${infoRow('Civil Status', c.status)}
+      ${infoRow('Citizenship', c.citizen)}  ${infoRow('No. of Dependents', c.dep)}
+      ${infoRow('Place of Birth', c.pob)}   ${infoRow('TIN', c.tin)}
+      ${infoRow('SSS / GSIS No.', c.sss)}  ${infoRow('Mobile No.', c.mobile)}
+      ${infoRow('Landline', c.land)}        ${infoRow('Email Address', c.email)}
     </div>
     <div class="info-grid" style="margin-bottom:1.2rem">
       ${infoRow('Home Address', c.address)}
@@ -300,18 +425,12 @@ function buildDoc(data) {
 
     <div class="section-title">D — Co-Borrower Employment & Financial Information</div>
     <div class="info-grid">
-      ${infoRow('Company Name', ce.company)}
-      ${infoRow('Office Address', ce.offaddr)}
-      ${infoRow('Position', ce.pos)}
-      ${infoRow('Office Number', ce.offnum)}
-      ${infoRow('Length of Service', ce.los)}
-      ${infoRow('Nature of Industry', ce.industry)}
-      ${infoRow('Previous Employer', ce.prev)}
-      ${infoRow('Monthly Income', ce.income ? '₱' + Number(ce.income).toLocaleString() : '')}
-      ${infoRow('Other Income Sources', ce.other)}
-      ${infoRow('Bank', ce.bank)}
-      ${infoRow('Account Type', ce.accttype)}
-      ${infoRow('Account Number', ce.acctnum)}
+      ${infoRow('Company Name', ce.company)}       ${infoRow('Office Address', ce.offaddr)}
+      ${infoRow('Position', ce.pos)}               ${infoRow('Office Number', ce.offnum)}
+      ${infoRow('Length of Service', ce.los)}      ${infoRow('Nature of Industry', ce.industry)}
+      ${infoRow('Previous Employer', ce.prev)}     ${infoRow('Monthly Income', ce.income ? '₱' + Number(ce.income).toLocaleString() : '')}
+      ${infoRow('Other Income Sources', ce.other)} ${infoRow('Bank', ce.bank)}
+      ${infoRow('Account Type', ce.accttype)}      ${infoRow('Account Number', ce.acctnum)}
       ${infoRow('Branch', ce.branch)}
     </div>
 
@@ -344,64 +463,113 @@ function buildDoc(data) {
 }
 
 // ------------------------------------------------------------
-// FORM SUBMISSION
+// SUBMIT FORM → SAVE TO FIRESTORE
 // ------------------------------------------------------------
-function submitForm() {
+async function submitForm() {
+  if (!validatePage(5)) return;
+
   const data = collectData();
-  submissions.push(data);
-  localStorage.setItem('tmb_submissions', JSON.stringify(submissions));
-  document.getElementById('printable-doc').innerHTML = buildDoc(data);
-  goScreen('output');
-  showToast('Application submitted successfully!');
+  showLoading('Submitting application...');
+
+  try {
+    const docRef = await db.collection(COLLECTION).add(data);
+    data.firestoreId = docRef.id;
+    document.getElementById('printable-doc').innerHTML = buildDoc(data);
+    hideLoading();
+    goScreen('output');
+    showToast('Application submitted successfully!');
+  } catch (err) {
+    hideLoading();
+    console.error('Firestore error:', err);
+    showToast('Submission failed. Please check your connection and try again.');
+  }
 }
 
 // ------------------------------------------------------------
 // PRINT / PDF
 // ------------------------------------------------------------
-function printDoc() {
-  window.print();
-}
-
-function savePDF() {
-  showToast('Preparing PDF...');
-  setTimeout(() => { window.print(); }, 300);
-}
+function printDoc() { window.print(); }
+function savePDF()   { showToast('Preparing PDF...'); setTimeout(() => window.print(), 300); }
 
 // ------------------------------------------------------------
-// ADMIN DASHBOARD
+// ADMIN DASHBOARD — LOAD FROM FIRESTORE
 // ------------------------------------------------------------
-function renderAdmin() {
+async function loadSubmissions() {
   const body = document.getElementById('admin-body');
+  body.innerHTML = '<div class="empty-state">Loading submissions...</div>';
 
-  if (!submissions.length) {
-    body.innerHTML = '<div class="empty-state">No submissions yet. Client forms will appear here.</div>';
-    return;
+  try {
+    const snapshot = await db.collection(COLLECTION)
+      .orderBy('ts', 'desc')
+      .get();
+
+    if (snapshot.empty) {
+      body.innerHTML = '<div class="empty-state">No submissions yet. Client forms will appear here.</div>';
+      return;
+    }
+
+    body.innerHTML = snapshot.docs.map(doc => {
+      const s       = doc.data();
+      const id      = doc.id;
+      const b       = s.borrower;
+      const name    = [b.first, b.last].filter(Boolean).join(' ') || 'Unknown Applicant';
+      const unit    = s.unit.unit || 'No unit specified';
+      const dateStr = formatDate(s.ts) + ' ' + formatTime(s.ts);
+      const refId   = 'TMB-' + id.slice(0, 10).toUpperCase();
+
+      return `
+        <div class="admin-card">
+          <div class="admin-card-info">
+            <h4>${name} <span class="badge">Submitted</span></h4>
+            <p>${unit} | ${s.unit.dp || '—'} DP | ${s.unit.term || '—'} | ${dateStr}</p>
+            <p style="font-size:0.78rem;color:#aaa;">Ref: ${refId}</p>
+          </div>
+          <div class="admin-card-actions">
+            <button class="btn-view"   onclick="viewSubmission('${id}')">View / Print</button>
+            <button class="btn-delete" onclick="deleteSubmission('${id}', '${name.replace(/'/g,"\\'")}')">🗑 Delete</button>
+          </div>
+        </div>`;
+    }).join('');
+
+  } catch (err) {
+    console.error('Firestore fetch error:', err);
+    body.innerHTML = '<div class="empty-state">Error loading submissions. Please check your connection.</div>';
   }
-
-  body.innerHTML = submissions.map((s, i) => {
-    const b       = s.borrower;
-    const name    = [b.first, b.last].filter(Boolean).join(' ') || 'Unknown Applicant';
-    const unit    = s.unit.unit || 'No unit specified';
-    const dateStr = formatDate(s.ts) + ' ' + formatTime(s.ts);
-
-    return `
-      <div class="admin-card">
-        <div class="admin-card-info">
-          <h4>${name} <span class="badge">Submitted</span></h4>
-          <p>${unit} | ${s.unit.dp || '—'} DP | ${s.unit.term || '—'} | Submitted: ${dateStr}</p>
-          <p style="font-size:0.78rem;color:#aaa;">
-            Ref: TMB-${s.ts.replace(/[^0-9]/g, '').slice(2, 12)}
-          </p>
-        </div>
-        <div class="admin-card-actions">
-          <button class="btn-view" onclick="viewSubmission(${i})">View / Print</button>
-        </div>
-      </div>`;
-  }).join('');
 }
 
-function viewSubmission(i) {
-  const data = submissions[i];
-  document.getElementById('printable-doc').innerHTML = buildDoc(data);
-  goScreen('output');
+// ------------------------------------------------------------
+// VIEW SUBMISSION FROM FIRESTORE
+// ------------------------------------------------------------
+async function viewSubmission(docId) {
+  showLoading('Loading record...');
+  try {
+    const doc  = await db.collection(COLLECTION).doc(docId).get();
+    const data = doc.data();
+    data.firestoreId = docId;
+    document.getElementById('printable-doc').innerHTML = buildDoc(data);
+    hideLoading();
+    goScreen('output');
+  } catch (err) {
+    hideLoading();
+    console.error('Firestore view error:', err);
+    showToast('Could not load this record. Please try again.');
+  }
+}
+
+// ------------------------------------------------------------
+// DELETE SUBMISSION FROM FIRESTORE
+// ------------------------------------------------------------
+async function deleteSubmission(docId, name) {
+  if (!confirm(`Are you sure you want to delete the record for ${name}? This cannot be undone.`)) return;
+  showLoading('Deleting record...');
+  try {
+    await db.collection(COLLECTION).doc(docId).delete();
+    hideLoading();
+    showToast(`Record for ${name} has been deleted.`);
+    loadSubmissions();
+  } catch (err) {
+    hideLoading();
+    console.error('Firestore delete error:', err);
+    showToast('Delete failed. Please try again.');
+  }
 }
