@@ -93,6 +93,7 @@
         </div>
       </div>
       <div class="nav-row">
+        <button class="btn-back" onclick="goScreen('welcome')">← Back</button>
         <button class="btn-next" style="border:none" onclick="goNext(1)">Next →</button>
       </div>
     </div>
@@ -319,14 +320,20 @@
     <button class="btn-logout" onclick="goScreen('welcome')">Logout</button>
   </div>
   <div class="admin-body" id="admin-body">
-    <div class="empty-state">No submissions yet.</div>
+    <div class="empty-state">Loading submissions...</div>
   </div>
 </div>
 
 <!-- Toast Notification -->
 <div class="toast" id="toast"></div>
 
-<!-- Scripts -->
+<!-- ============================================================
+     FIREBASE SDK (v10 compat — no build tool needed)
+     ============================================================ -->
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+
+<!-- App Logic -->
 <script src="script.js"></script>
 
 </body>
