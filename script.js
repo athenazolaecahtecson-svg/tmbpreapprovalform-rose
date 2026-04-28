@@ -1,11 +1,8 @@
+
 // ============================================================
-//  Toyota Manila Bay — Pre-Approval System
-//  FIXED: Loading freeze + submit stability
+// Toyota Manila Bay — Pre-Approval System (FIXED VERSION)
 // ============================================================
 
-// ------------------------------------------------------------
-// FIREBASE CONFIGURATION
-// ------------------------------------------------------------
 const firebaseConfig = {
   apiKey: "PASTE_YOUR_API_KEY_HERE",
   authDomain: "PASTE_YOUR_AUTH_DOMAIN_HERE",
@@ -20,15 +17,15 @@ const db = firebase.firestore();
 const COLLECTION = 'tmb_submissions';
 
 // ------------------------------------------------------------
-// CREDENTIALS
+// ADMIN
 // ------------------------------------------------------------
 const ADMIN_EMAIL = 'jennyrosedoreza1709@gmail.com';
 const ADMIN_PASS  = '110907';
 
 // ------------------------------------------------------------
-// LOADING (FIXED SAFE VERSION)
+// LOADING (FIXED - NO INFINITE STUCK)
 // ------------------------------------------------------------
-let loadingTimeout = null;
+let loadingTimeout;
 
 function showLoading(msg = 'Please wait...') {
   let el = document.getElementById('loading-overlay');
@@ -43,11 +40,10 @@ function showLoading(msg = 'Please wait...') {
   el.innerHTML = `<div class="spinner"></div><span>${msg}</span>`;
   el.style.display = 'flex';
 
-  // AUTO SAFETY RESET (prevents infinite loading)
   clearTimeout(loadingTimeout);
   loadingTimeout = setTimeout(() => {
     hideLoading();
-    showToast('Request took too long. Please try again.');
+    showToast('Request timed out. Please try again.');
   }, 20000);
 }
 
@@ -94,16 +90,17 @@ function adminLogin() {
     goScreen('admin');
     loadSubmissions();
   } else {
-    showToast('Invalid credentials. Please try again.');
+    showToast('Invalid credentials');
   }
 }
 
 // ------------------------------------------------------------
-// VALIDATION (UNCHANGED - SAFE)
+// SAFE VALIDATION (FIXED NEXT BUTTON ISSUE)
 // ------------------------------------------------------------
 function validatePage(n) {
   const fields = PAGE_FIELDS[n] || [];
   let firstError = null;
+
   let missing = [];
 
   fields.forEach(f => {
@@ -112,7 +109,10 @@ function validatePage(n) {
 
     el.style.borderColor = '';
 
-    if (!el.value.trim()) {
+    const value = (el.value || '').trim();
+
+    // ONLY validate visible inputs
+    if (el.offsetParent !== null && value === '') {
       el.style.borderColor = '#CC0000';
       missing.push(f.label);
       if (!firstError) firstError = el;
@@ -131,7 +131,21 @@ function validatePage(n) {
 }
 
 // ------------------------------------------------------------
-// FORM DATA COLLECTION (UNCHANGED)
+// NAVIGATION STEPS
+// ------------------------------------------------------------
+function goPage(n) {
+  for (let i = 1; i <= 5; i++) {
+    document.getElementById('page-' + i).style.display = (i === n) ? '' : 'none';
+  }
+}
+
+function goNext(n) {
+  if (!validatePage(n)) return;
+  goPage(n + 1);
+}
+
+// ------------------------------------------------------------
+// DATA COLLECTION
 // ------------------------------------------------------------
 function getVal(id) {
   const el = document.getElementById(id);
@@ -171,15 +185,15 @@ function collectData() {
 }
 
 // ------------------------------------------------------------
-// 🔥 FIXED SUBMIT FUNCTION (MAIN FIX ONLY)
+// SUBMIT (FIXED - NO FREEZE)
 // ------------------------------------------------------------
 async function submitForm() {
   if (!validatePage(5)) return;
 
   const data = collectData();
 
-  const submitBtn = document.querySelector('[onclick="submitForm()"]');
-  if (submitBtn) submitBtn.disabled = true;
+  const btn = document.querySelector('[onclick="submitForm()"]');
+  if (btn) btn.disabled = true;
 
   showLoading('Submitting application...');
 
@@ -192,15 +206,14 @@ async function submitForm() {
 
     hideLoading();
     goScreen('output');
-    showToast('Application submitted successfully!');
+    showToast('Submitted successfully!');
 
   } catch (err) {
-    console.error('Submit error:', err);
-
+    console.error(err);
     hideLoading();
-    showToast('Submission failed. Please try again.');
+    showToast('Submission failed');
 
   } finally {
-    if (submitBtn) submitBtn.disabled = false;
+    if (btn) btn.disabled = false;
   }
 }
